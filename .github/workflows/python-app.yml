@@ -13,13 +13,17 @@ permissions:
   contents: read
 
 jobs:
-  build:
 
-    runs-on: ubuntu-latest
+
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
     defaults:
       run:
-        working-directory: ./example-app
-
+        working-directory: ./example-app   
+        shell: bash
 
     steps:
     - uses: actions/checkout@v3
@@ -42,11 +46,14 @@ jobs:
     
   lint:
     needs: build
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
     defaults:
       run:
         working-directory: ./example-app   
+        shell: bash
 
     steps:
     - uses: actions/checkout@v3
@@ -67,11 +74,14 @@ jobs:
       
   formatter:
     needs: build
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
     defaults:
       run:
         working-directory: ./example-app   
+        shell: bash
 
     steps:
     - uses: actions/checkout@v3
@@ -88,15 +98,18 @@ jobs:
         path: /home/runner/.cache/pypoetry/virtualenvs
         key: ${{ runner.os }}-venv
     - name: Lint with flake8
-      run: poetry run task lint
+      run: poetry run task formatter
       
   security:
     needs: build
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
     defaults:
       run:
         working-directory: ./example-app   
+        shell: bash
 
     steps:
     - uses: actions/checkout@v3
@@ -113,16 +126,19 @@ jobs:
         path: /home/runner/.cache/pypoetry/virtualenvs
         key: ${{ runner.os }}-venv
     - name: Lint with flake8
-      run: poetry run task lint
+      run: poetry run task security
 
   unitest:
     if: ${{ always() }}
     needs: [lint, security,formatter]
-
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
     defaults:
       run:
-        working-directory: ./example-app
+        working-directory: ./example-app   
+        shell: bash
 
     steps:
     - uses: actions/checkout@v3
